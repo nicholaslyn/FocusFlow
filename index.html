@@ -57,8 +57,9 @@
   .grow{flex:1}
 
   /* Inputs & Buttons */
-  input,select,button{border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:12px 14px;font:inherit;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-  input,textarea{width:100%;background:rgba(255,255,255,.03)}
+  input,select,button{border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:12px 14px;font:inherit;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;caret-color:var(--acc1)}
+  input,textarea{width:100%;background:rgba(255,255,255,.03);-webkit-text-fill-color:var(--ink)}
+  ::placeholder{color:var(--muted);opacity:.95}
   input[type=number]{-moz-appearance:textfield}
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input[type=number]{inputmode:numeric}
@@ -82,11 +83,17 @@
 
   /* Goals & Habits list — cleaner */
   .list{display:flex;flex-direction:column;gap:10px}
-  .item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px}
-  .item input[type="text"], .item input[type="checkbox"]{background:transparent}
-  .item input[type="text"]{border:1px solid var(--border);border-radius:10px;padding:10px}
+  .item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px;flex-wrap:wrap}
+  .item input[type="text"]{border:1px solid var(--border);border-radius:10px;padding:12px;background:rgba(255,255,255,.06);color:var(--ink);-webkit-text-fill-color:var(--ink);flex:1;min-width:180px}
+  .item input[type="checkbox"]{accent-color:#7c3aed}
   .item button{min-width:44px}
   .nowrap{overflow-wrap:anywhere}
+  .done input[type="text"]{text-decoration:line-through;opacity:.8}
+
+  /* Habit day pills */
+  .days{display:grid;grid-template-columns:repeat(7,36px);gap:8px}
+  .pill{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-weight:700}
+  .pill.on{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-color:transparent;color:#fff}
 
   /* KPI & heatmap (7 x 5 so it never overflows) */
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -234,11 +241,11 @@ function duration(m){return (m==='focus'?+focusMin.value:m==='short'?+shortMin.v
 function mmss(s){const m=Math.floor(s/60),ss=(''+(s%60)).padStart(2,'0');return `${m}:${ss}`}
 const ringLen=2*Math.PI*46; const ring=$('ringFg'); ring.setAttribute('stroke-dasharray', String(ringLen));
 function setRingProgress(){ const total = (mode==='focus'?+focusMin.value:mode==='short'?+shortMin.value:+longMin.value)*60; const p = Math.max(0, Math.min(1, 1 - remaining/total)); ring.style.strokeDashoffset = String(ringLen * (1-p)); }
-function renderClock(){ if(mode==='pause'&&remaining){$('clock').textContent=mmss(remaining);} else { remaining=duration(mode==='pause'?'focus':mode); $('clock').textContent=mmss(remaining);} $('phase').textContent=mode==='focus'?'Focus':mode==='short'?'Break':'Long break'; $('sessionInfo').innerHTML=`${cycles % (+longEvery.value||4)}/${+longEvery.value||4} cycles • Today: <span id="minsToday">${focusedToday()}</span> min`; setRingProgress(); updateDock(); }
-function tick(){ remaining--; $('clock').textContent=mmss(remaining); setRingProgress(); updateDock(); if(remaining<=0){ phaseEnded(); }}
-function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); updateDock(); setActiveBtn($('start')); }
-function pause(){ clearInterval(timer); timer=null; mode='pause'; updateDock(); setActiveBtn($('pause')); }
-function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); updateDock(); setActiveBtn($('reset')); }
+function renderClock(){ if(mode==='pause'&&remaining){$('clock').textContent=mmss(remaining);} else { remaining=duration(mode==='pause'?'focus':mode); $('clock').textContent=mmss(remaining);} $('phase').textContent=mode==='focus'?'Focus':mode==='short'?'Break':'Long break'; $('sessionInfo').innerHTML=`${cycles % (+longEvery.value||4)}/${+longEvery.value||4} cycles • Today: <span id="minsToday">${focusedToday()}</span> min`; setRingProgress(); }
+function tick(){ remaining--; $('clock').textContent=mmss(remaining); setRingProgress(); if(remaining<=0){ phaseEnded(); }}
+function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); setActiveBtn($('start')); }
+function pause(){ clearInterval(timer); timer=null; mode='pause'; setActiveBtn($('pause')); }
+function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); setActiveBtn($('reset')); }
 function skip(){ clearInterval(timer); timer=null; nextPhase(true); setActiveBtn($('skip')); }
 function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)+mins; save(); toast(`+${mins} min logged`); }
 function focusedToday(){ return focusLog[todayStr()]||0; }
@@ -253,25 +260,34 @@ function phaseEnded(){
   save(); renderClock();
 }
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); }
-$('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); setActiveBtn($('complete')); };
+['start','pause','reset','skip','complete'].forEach(id=>$(id).addEventListener('click',()=>setActiveBtn($(id))));
+function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); el.classList.add('primary'); }
 renderClock();
-
-// ===== Buttons highlight (active = last clicked)
-const ctrlIds=['start','pause','reset','skip','complete'];
-const ctrlEls=ctrlIds.map(id=>$(id));
-function setActiveBtn(el){ ctrlEls.forEach(b=>b.classList.remove('primary')); if(el) el.classList.add('primary'); }
-ctrlEls.forEach(b=> b.addEventListener('click', ()=> setActiveBtn(b)));
-function updateDock(){} // no floating dock
 
 // ====== Daily Goals ======
 function goalsToday(){ const k=todayStr(); if(!goalsByDay[k]) goalsByDay[k]=[]; return goalsByDay[k]; }
-function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; const txt=document.createElement('input'); txt.type='text'; txt.value=g.text; txt.className='grow'; const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; cb.onchange=()=>{ g.done=cb.checked; save(); }; txt.onchange=()=>{ g.text=txt.value; save(); }; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } }; row.append(cb,txt,del); host.appendChild(row); }); }
+function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'+(g.done?' done':'');
+  const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; cb.onchange=()=>{ g.done=cb.checked; row.classList.toggle('done', g.done); save(); };
+  const txt=document.createElement('input'); txt.type='text'; txt.value=g.text; txt.placeholder='Goal'; txt.className='grow'; txt.oninput=()=>{ g.text=txt.value; save(); };
+  const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } };
+  row.append(cb,txt,del); host.appendChild(row); }); }
 $('addGoal').onclick=()=>{ const v=$('goalInput').value.trim(); if(!v) return; goalsToday().push({id:crypto.randomUUID(), text:v, done:false}); $('goalInput').value=''; save(); drawGoals(); toast('Goal added'); };
 drawGoals();
 
 // ====== Habits ======
 function lastNDates(n){ const arr=[]; const now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); arr.push(d.toISOString().slice(0,10)); } return arr; }
-function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{ const row=document.createElement('div'); row.className='item'; const name=document.createElement('input'); name.type='text'; name.value=h.name; name.className='grow'; name.onchange=()=>{h.name=name.value; save();}; row.appendChild(name); const group=document.createElement('div'); group.style.display='flex'; group.style.gap='6px'; days.forEach(d=>{ const b=document.createElement('button'); b.textContent=h.days&&h.days[d]?'✔':''; b.title=d; b.style.minWidth='36px'; b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; save(); drawHabits(); updateViews();}; group.appendChild(b); }); const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} }; row.appendChild(group); row.appendChild(del); host.appendChild(row); }); }
+function dayLetter(iso){ try{ return new Date(iso).toLocaleDateString(undefined,{weekday:'short'}).slice(0,1).toUpperCase(); }catch(_){ return '·'; } }
+function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{
+  const row=document.createElement('div'); row.className='item';
+  const name=document.createElement('input'); name.type='text'; name.value=h.name; name.placeholder='Habit name'; name.className='grow'; name.oninput=()=>{h.name=name.value; save();};
+  const grid=document.createElement('div'); grid.className='days';
+  days.forEach(d=>{ const b=document.createElement('button'); b.className='pill'+(h.days&&h.days[d]?' on':''); b.setAttribute('aria-pressed', h.days&&h.days[d]?'true':'false'); b.title=d; b.textContent=dayLetter(d);
+    b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; b.classList.toggle('on'); b.setAttribute('aria-pressed', h.days[d]?'true':'false'); save(); updateViews();};
+    grid.appendChild(b);
+  });
+  const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} };
+  row.appendChild(name); row.appendChild(grid); row.appendChild(del); host.appendChild(row);
+}); }
 $('addHabit').onclick=()=>{ const v=$('habitInput').value.trim(); if(!v) return; habits.push({id:crypto.randomUUID(), name:v, days:{}}); $('habitInput').value=''; save(); drawHabits(); toast('Habit added'); };
 drawHabits();
 
@@ -296,4 +312,3 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>
-
