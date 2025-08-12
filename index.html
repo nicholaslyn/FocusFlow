@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  /* ===== Techy Neon — premium visuals (mobile-first) ===== */
+  /* ===== Techy Neon — premium visuals (mobile-first, decluttered) ===== */
   :root{
     --ink:#E9ECF5;           /* primary text */
     --muted:#A3B2C9;         /* secondary text */
@@ -28,12 +28,11 @@
       radial-gradient(1200px 700px at -20% -20%, rgba(34,211,238,.25) 0%, transparent 60%),
       radial-gradient(1000px 600px at 110% -10%, rgba(124,58,237,.22) 0%, transparent 60%),
       linear-gradient(180deg,#0b1020 0%, #070b16 60%, #040812 100%);
-    padding-bottom:96px; /* space for dock on mobile */
     -webkit-text-size-adjust: 100%;
   }
   a{color:inherit}
   header{position:sticky;top:0;z-index:20;background:rgba(4,8,18,.6);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
-  .wrap{max-width:1200px;margin:auto;padding:16px}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{font-weight:800;letter-spacing:.3px;font-size:18px;background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
 
@@ -42,25 +41,24 @@
   .tabs button{flex:1;min-width:120px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:10px 14px}
   .tabs button.active{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-color:transparent;color:#fff}
 
-  main.wrap{display:grid;grid-template-columns:1fr;gap:16px}
-  @media (min-width: 980px){ body{padding-bottom:0} .tabs{display:none} main.wrap{grid-template-columns:1.1fr .9fr} }
+  /* Layout: airy on desktop */
+  main.wrap{display:grid;grid-template-columns:1fr;gap:18px}
+  @media (min-width: 980px){ main.wrap{grid-template-columns:1.15fr .85fr; gap:20px} }
 
+  /* Cards */
   .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .card + .card{margin-top:4px}
   .card::before{content:"";position:absolute;inset:-1px;border-radius:calc(var(--radius)+1px);padding:1px;background:linear-gradient(135deg,rgba(34,211,238,.45),rgba(124,58,237,.45));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 
   h2{margin:0 0 12px;font-size:clamp(18px,2vw,20px);color:#F3F6FF}
   .hint{color:var(--muted);font-size:13px}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  /* Timer controls grid on small screens */
-  #sec-timer .row:first-of-type{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  #sec-timer .row:first-of-type label{display:grid;grid-template-columns:1fr 96px;align-items:center}
-  #sec-timer .row:first-of-type input{width:100%;text-align:center}
-  @media (min-width:700px){#sec-timer .row:first-of-type{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .stack{display:flex;flex-direction:column;gap:12px}
+  .grow{flex:1}
 
-  /* Better tap targets & mobile keyboard */
+  /* Inputs & Buttons */
   input,select,button{border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:12px 14px;font:inherit;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-  input,textarea{width:100%}
+  input,textarea{width:100%;background:rgba(255,255,255,.03)}
   input[type=number]{-moz-appearance:textfield}
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   input[type=number]{inputmode:numeric}
@@ -69,23 +67,41 @@
   button.primary:hover{transform:translateY(-1px)}
   button.ghost{background:rgba(255,255,255,.06)}
 
+  /* Timer controls become a neat grid on phones */
+  #sec-timer .row:first-of-type{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #sec-timer .row:first-of-type label{display:grid;grid-template-columns:1fr 96px;align-items:center}
+  #sec-timer .row:first-of-type input{width:100%;text-align:center}
+  @media (min-width:720px){#sec-timer .row:first-of-type{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
   /* Timer */
-  .timer-wrap{display:grid;place-items:center;margin:4px 0 10px}
+  .timer-wrap{display:grid;place-items:center;margin:6px 0 12px}
   .ring{position:relative;width:min(82vw,360px);height:min(82vw,360px)}
   .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
   .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(30px,10vw,60px)}
   .phase{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
-  /* KPI & heatmap */
+  /* Goals & Habits list — cleaner */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px}
+  .item input[type="text"], .item input[type="checkbox"]{background:transparent}
+  .item input[type="text"]{border:1px solid var(--border);border-radius:10px;padding:10px}
+  .item button{min-width:44px}
+  .nowrap{overflow-wrap:anywhere}
+
+  /* KPI & heatmap (7 x 5 so it never overflows) */
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .kpi{border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.04)}
   .num{font-weight:800;font-size:clamp(18px,3.5vw,24px);background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .heat{display:grid;grid-template-columns:repeat(35,12px);gap:4px}
-  .cell{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--border)}
+  .heat{display:grid;grid-template-columns:repeat(7, 14px);gap:6px;justify-content:flex-start}
+  .cell{width:14px;height:14px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--border)}
   .c1{background:#0ea5e955}.c2{background:#7dd3fc77}.c3{background:#60a5fa99}.c4{background:#a78bfaAA}
 
-  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden}
-  td,th{border-bottom:1px solid var(--border);padding:10px}
+  /* Weekly table — compact & safe on mobile */
+  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden;table-layout:fixed;display:block;overflow-x:auto}
+  thead,tbody,tr{display:table;width:100%}
+  td,th{border-bottom:1px solid var(--border);padding:10px;white-space:nowrap}
+  @media (max-width:420px){ td,th{padding:8px;font-size:13px} }
+
   canvas{width:100%;height:220px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px}
 
   /* Toasts & overlay */
@@ -93,12 +109,6 @@
   .toast{background:rgba(17,24,39,.85);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;color:var(--ink)}
   .overlay{position:fixed;inset:0;background:rgba(2,8,23,.35);display:none;align-items:center;justify-content:center;z-index:100;pointer-events:none}
   .overlay .count{font:800 clamp(48px,14vw,84px)/1 'Plus Jakarta Sans';color:#fff;background:linear-gradient(135deg,rgba(34,211,238,.85),rgba(124,58,237,.85));padding:20px 28px;border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.45)}
-
-  /* Mobile sticky dock */
-  .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:999px;background:rgba(17,24,39,.75);backdrop-filter:blur(10px);border:1px solid var(--border);box-shadow:var(--shadow);z-index:70}
-  .dock .dclock{font-weight:800}
-  .dock .dphase{color:var(--muted)}
-  @media (min-width:980px){ .dock{display:none} }
 </style>
 </head>
 <body>
@@ -144,7 +154,7 @@
     </div>
 
     <div class="row">
-      <button id="start" class="primary">Start</button>
+      <button id="start" class="ghost">Start</button>
       <button id="pause" class="ghost">Pause</button>
       <button id="reset" class="ghost">Reset</button>
       <button id="skip" class="ghost">Skip</button>
@@ -157,7 +167,7 @@
   <!-- Daily Goals -->
   <section id="sec-goals" class="card stack" data-panel="goals">
     <h2>Daily Goals</h2>
-    <div class="row"><input id="goalInput" class="grow" placeholder="Add a goal for today…"><button id="addGoal" class="primary">Add</button></div>
+    <div class="row"><input id="goalInput" class="grow nowrap" placeholder="Add a goal for today…"><button id="addGoal" class="primary">Add</button></div>
     <div id="goalList" class="list"></div>
   </section>
 
@@ -165,7 +175,7 @@
   <section id="sec-habits" class="card stack" data-panel="habits">
     <h2>Habits (last 7 days)</h2>
     <div class="row">
-      <input id="habitInput" class="grow" placeholder="Add habit (e.g., Read 20m)">
+      <input id="habitInput" class="grow nowrap" placeholder="Add habit (e.g., Read 20m)">
       <button id="addHabit" class="primary">Add</button>
     </div>
     <div id="habitList" class="list"></div>
@@ -180,6 +190,8 @@
       <div class="kpi"><div class="num" id="kpiWeek">0</div><div class="hint">Focused minutes this week</div></div>
     </div>
     <div id="heat" class="heat" aria-label="Streak heatmap"></div>
+    <table id="weekTable"><thead><tr><th>Date</th><th>Focused minutes</th></tr></thead><tbody></tbody></table>
+    <canvas id="chart"></canvas>
   </section>
 
   <!-- Backup -->
@@ -195,7 +207,6 @@
 
 <div class="overlay" id="overlay"><div class="count" id="count">3</div></div>
 <div class="toasts" id="toasts"></div>
-<div class="dock" id="dock"><div class="dphase" id="dphase">Ready</div><div class="dclock" id="dclock">25:00</div><button id="dockStart" class="primary">Start</button></div>
 
 <script>
 // ====== Helpers & State ======
@@ -225,10 +236,10 @@ const ringLen=2*Math.PI*46; const ring=$('ringFg'); ring.setAttribute('stroke-da
 function setRingProgress(){ const total = (mode==='focus'?+focusMin.value:mode==='short'?+shortMin.value:+longMin.value)*60; const p = Math.max(0, Math.min(1, 1 - remaining/total)); ring.style.strokeDashoffset = String(ringLen * (1-p)); }
 function renderClock(){ if(mode==='pause'&&remaining){$('clock').textContent=mmss(remaining);} else { remaining=duration(mode==='pause'?'focus':mode); $('clock').textContent=mmss(remaining);} $('phase').textContent=mode==='focus'?'Focus':mode==='short'?'Break':'Long break'; $('sessionInfo').innerHTML=`${cycles % (+longEvery.value||4)}/${+longEvery.value||4} cycles • Today: <span id="minsToday">${focusedToday()}</span> min`; setRingProgress(); updateDock(); }
 function tick(){ remaining--; $('clock').textContent=mmss(remaining); setRingProgress(); updateDock(); if(remaining<=0){ phaseEnded(); }}
-function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); updateDock(); }
-function pause(){ clearInterval(timer); timer=null; mode='pause'; updateDock(); }
-function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); updateDock(); }
-function skip(){ clearInterval(timer); timer=null; nextPhase(true); }
+function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); updateDock(); setActiveBtn($('start')); }
+function pause(){ clearInterval(timer); timer=null; mode='pause'; updateDock(); setActiveBtn($('pause')); }
+function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); updateDock(); setActiveBtn($('reset')); }
+function skip(){ clearInterval(timer); timer=null; nextPhase(true); setActiveBtn($('skip')); }
 function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)+mins; save(); toast(`+${mins} min logged`); }
 function focusedToday(){ return focusLog[todayStr()]||0; }
 function phaseEnded(){
@@ -242,22 +253,25 @@ function phaseEnded(){
   save(); renderClock();
 }
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); }
-$('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
+$('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); setActiveBtn($('complete')); };
 renderClock();
 
-// ====== Mobile dock ======
-function updateDock(){ const dclock=$('dclock'), dphase=$('dphase'), btn=$('dockStart'); dclock.textContent = $('clock').textContent; dphase.textContent = (mode==='focus'?'Focus':mode==='short'?'Break':'Long break'); btn.textContent = (timer? 'Pause' : (mode==='pause'?'Start':'Start')); }
-$('dockStart').addEventListener('click', ()=>{ if(timer) pause(); else start(); });
+// ===== Buttons highlight (active = last clicked)
+const ctrlIds=['start','pause','reset','skip','complete'];
+const ctrlEls=ctrlIds.map(id=>$(id));
+function setActiveBtn(el){ ctrlEls.forEach(b=>b.classList.remove('primary')); if(el) el.classList.add('primary'); }
+ctrlEls.forEach(b=> b.addEventListener('click', ()=> setActiveBtn(b)));
+function updateDock(){} // no floating dock
 
 // ====== Daily Goals ======
 function goalsToday(){ const k=todayStr(); if(!goalsByDay[k]) goalsByDay[k]=[]; return goalsByDay[k]; }
-function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; const txt=document.createElement('input'); txt.value=g.text; txt.className='grow'; const del=document.createElement('button'); del.textContent='Delete'; cb.onchange=()=>{ g.done=cb.checked; save(); }; txt.onchange=()=>{ g.text=txt.value; save(); }; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } }; row.append(cb,txt,del); host.appendChild(row); }); }
+function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; const txt=document.createElement('input'); txt.type='text'; txt.value=g.text; txt.className='grow'; const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; cb.onchange=()=>{ g.done=cb.checked; save(); }; txt.onchange=()=>{ g.text=txt.value; save(); }; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } }; row.append(cb,txt,del); host.appendChild(row); }); }
 $('addGoal').onclick=()=>{ const v=$('goalInput').value.trim(); if(!v) return; goalsToday().push({id:crypto.randomUUID(), text:v, done:false}); $('goalInput').value=''; save(); drawGoals(); toast('Goal added'); };
 drawGoals();
 
 // ====== Habits ======
 function lastNDates(n){ const arr=[]; const now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); arr.push(d.toISOString().slice(0,10)); } return arr; }
-function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{ const row=document.createElement('div'); row.className='item'; const name=document.createElement('input'); name.value=h.name; name.className='grow'; name.onchange=()=>{h.name=name.value; save();}; row.appendChild(name); days.forEach(d=>{ const b=document.createElement('button'); b.textContent=h.days&&h.days[d]?'✔':''; b.title=d; b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; save(); drawHabits(); updateViews();}; row.appendChild(b); }); const del=document.createElement('button'); del.textContent='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} }; row.appendChild(del); host.appendChild(row); }); }
+function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{ const row=document.createElement('div'); row.className='item'; const name=document.createElement('input'); name.type='text'; name.value=h.name; name.className='grow'; name.onchange=()=>{h.name=name.value; save();}; row.appendChild(name); const group=document.createElement('div'); group.style.display='flex'; group.style.gap='6px'; days.forEach(d=>{ const b=document.createElement('button'); b.textContent=h.days&&h.days[d]?'✔':''; b.title=d; b.style.minWidth='36px'; b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; save(); drawHabits(); updateViews();}; group.appendChild(b); }); const del=document.createElement('button'); del.textContent='✕'; del.title='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} }; row.appendChild(group); row.appendChild(del); host.appendChild(row); }); }
 $('addHabit').onclick=()=>{ const v=$('habitInput').value.trim(); if(!v) return; habits.push({id:crypto.randomUUID(), name:v, days:{}}); $('habitInput').value=''; save(); drawHabits(); toast('Habit added'); };
 drawHabits();
 
