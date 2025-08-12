@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#10b981">
+  
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>FocusFlow — Calm Productivity</title>
@@ -243,5 +246,12 @@ $('importBtn').onclick=()=>{ const inp=document.createElement('input'); inp.type
 // ======= Shortcuts =======
 document.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); if(tag==='input' || tag==='textarea') return; if(e.key.toLowerCase()==='s'){ if(timer) pause(); else start(); } if(e.key.toLowerCase()==='r'){ reset(); } if(e.key.toLowerCase()==='k'){ skip(); } if(e.key.toLowerCase()==='c'){ addFocusMinutes(+focusMin.value); save(); updateViews(); } if(e.key.toLowerCase()==='n'){ $('goalInput').focus(); }});
 </script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
+
 </body>
 </html>
+
