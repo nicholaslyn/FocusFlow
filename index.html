@@ -1,95 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#10b981">
-  
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FocusFlow — Calm Productivity</title>
-<meta name="theme-color" content="#f7f8fc"/>
+<title>FocusFlow — Habits & Pomodoro</title>
+<meta name="theme-color" content="#10b981" />
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
-  /* ===== Design tokens: Calm Productivity ===== */
+  /* ===== Calm, high-contrast, mobile-first ===== */
   :root{
-    --bg:#f7f8fc;           /* airy background */
-    --panel:#ffffff;        /* card surface */
-    --ink:#0f172a;          /* primary text */
-    --muted:#64748b;        /* secondary text */
-    --accent:#10b981;       /* teal accent */
-    --accent-weak:#d1fae5;  /* soft accent */
-    --good:#16a34a; --warn:#f59e0b; --danger:#ef4444;
+    --bg:#ffffff; --panel:#ffffff; --ink:#0f172a; --muted:#475569;
+    --accent:#0f766e; --accent-soft:#ccfbf1; --good:#16a34a; --warn:#f59e0b;
     --radius:16px; --shadow:0 8px 28px rgba(2,8,23,.08);
-    --ring:#e5e7eb;         /* progress bg */
-    --ring-fg:#10b981;      /* progress fg */
-    --speed:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+    --ring:#e5e7eb; --ring-fg:#0ea5e9; /* focus ring color */
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b1220; --panel:#0f172a; --ink:#e5e7eb; --muted:#9aa6b2; --ring:#1f2937; --accent-weak:#073b33; }
+    :root{ --bg:#0b1220; --panel:#0f172a; --ink:#e5e7eb; --muted:#9aa6b2; --ring:#1f2937; --accent-soft:#073b33; }
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
-  a{color:inherit}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.8));backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid rgba(2,8,23,.06)}
-  .wrap{max-width:1200px;margin:auto;padding:16px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.88));border-bottom:1px solid rgba(2,8,23,.06);backdrop-filter:blur(8px)}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{font-weight:800;letter-spacing:.3px}
   .toggles{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
-  .toggle{display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:#fff;box-shadow:var(--shadow)}
+  .toggle{display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:#fff}
 
-  main.wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  main.wrap{display:grid;grid-template-columns:1fr;gap:16px}
+  @media (min-width: 900px){ main.wrap{grid-template-columns:1.1fr .9fr} }
+
   .card{background:var(--panel);border:1px solid rgba(2,8,23,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-  h2{margin:0 0 8px 0;font-size:16px}
+  h2{margin:0 0 10px;font-size:clamp(16px,2vw,18px)}
   .hint{color:var(--muted);font-size:12px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .stack{display:flex;flex-direction:column;gap:10px}
   input,select,button{border-radius:12px;border:1px solid rgba(2,8,23,.12);background:#fff;color:var(--ink);padding:10px 12px;font:inherit}
-  input,select{background:#fff}
-  button{cursor:pointer;transition:transform var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background var(--speed) var(--ease)}
-  button.primary{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(16,185,129,.25)}
+  button{cursor:pointer;transition:transform .2s ease}
+  button.primary{background:var(--accent);color:#fff;border-color:transparent}
   button.primary:hover{transform:translateY(-1px)}
   button.ghost{background:#fff}
-  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:var(--accent-weak);color:#065f46;font-weight:600}
 
-  /* Timer ring */
+  /* Timer with responsive progress ring */
   .timer-wrap{display:grid;place-items:center;margin:8px 0}
-  .ring{position:relative;width:220px;height:220px}
+  .ring{position:relative;width:min(78vw,320px);height:min(78vw,320px)}
   .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
-  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:44px}
+  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(28px,10vw,56px)}
   .phase{color:var(--muted);font-size:12px;text-align:center;margin-top:4px}
 
-  /* Lists & tables */
   .list{display:flex;flex-direction:column;gap:8px}
-  .item{display:flex;gap:8px;align-items:center;border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:10px;background:#fff}
+  .item{display:flex;gap:8px;align-items:center;border:1px solid rgba(2,8,23,.1);border-radius:12px;padding:10px;background:#fff}
   .grow{flex:1}
+
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .kpi{border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:10px;background:#fff}
-  .num{font-weight:800;font-size:22px}
+  .num{font-weight:800;font-size:clamp(18px,3.5vw,24px)}
   .heat{display:grid;grid-template-columns:repeat(35,12px);gap:4px}
   .cell{width:12px;height:12px;border-radius:3px;background:#e8eef7;border:1px solid rgba(2,8,23,.06)}
   .c1{background:#c7f2e9}.c2{background:#9fead9}.c3{background:#71dfc6}.c4{background:#43d4b3}
+
   table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
   td,th{border-bottom:1px solid rgba(2,8,23,.06);padding:8px}
   canvas{width:100%;height:220px;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:12px}
 
-  /* Toasts */
-  .toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:60}
+  /* Toasts & overlay */
+  .toasts{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:60}
   .toast{background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;color:var(--ink)}
-
-  /* Countdown overlay (respects reduced motion) */
   .overlay{position:fixed;inset:0;background:rgba(2,8,23,.25);display:none;align-items:center;justify-content:center;z-index:50}
-  .overlay .count{font:800 72px/1 Inter;color:#065f46;background:rgba(255,255,255,.9);padding:20px 28px;border-radius:16px;border:1px solid rgba(2,8,23,.08)}
-  @media (prefers-reduced-motion: reduce){button{transition:none}}
-  @media (max-width:960px){main.wrap{grid-template-columns:1fr}}
+  .overlay .count{font:800 clamp(48px,14vw,84px)/1 Inter;color:#065f46;background:rgba(255,255,255,.9);padding:20px 28px;border-radius:16px;border:1px solid rgba(2,8,23,.08)}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap hrow">
-    <div class="brand">FocusFlow — Calm Productivity</div>
+    <div class="brand">FocusFlow</div>
     <div class="toggles">
       <label class="toggle"><input id="optSound" type="checkbox"> sound</label>
-      <label class="toggle"><input id="optNotify" type="checkbox"> notifications</label>
+      <label class="toggle">< id="optNotifyLbl"><input id="optNotify" type="checkbox"> notifications</label>
       <label class="toggle"><input id="optAuto" type="checkbox"> auto-start</label>
+      <button id="installBtn" class="toggle" title="Install app">↥ Install</button>
     </div>
   </div>
 </header>
@@ -99,9 +89,9 @@
   <section class="card stack">
     <h2>Pomodoro</h2>
     <div class="row">
-      <label>Focus (min) <input id="focusMin" type="number" min="5" value="25"></label>
-      <label>Short break <input id="shortMin" type="number" min="1" value="5"></label>
-      <label>Long break <input id="longMin" type="number" min="5" value="15"></label>
+      <label>Focus <input id="focusMin" type="number" min="5" value="25"> min</label>
+      <label>Short <input id="shortMin" type="number" min="1" value="5"> min</label>
+      <label>Long <input id="longMin" type="number" min="5" value="15"> min</label>
       <label>Long every <input id="longEvery" type="number" min="2" value="4"> cycles</label>
     </div>
 
@@ -177,22 +167,21 @@
 <div class="toasts" id="toasts"></div>
 
 <script>
-// ======= Storage & helpers (unchanged logic) =======
+// ===== Storage & helpers =====
 const K={settings:'ff_settings', habits:'ff_habits_v3', focus:'ff_focus_log_v3', goals:'ff_goals_v1'};
 const S=JSON.parse(localStorage.getItem(K.settings)||'{}');
 const habits=JSON.parse(localStorage.getItem(K.habits)||'[]');
 const focusLog=JSON.parse(localStorage.getItem(K.focus)||'{}');
 const goalsByDay=JSON.parse(localStorage.getItem(K.goals)||'{}');
-const $=id=>document.getElementById(id);
-const todayStr=()=>new Date().toISOString().slice(0,10);
+const $=id=>document.getElementById(id); const todayStr=()=>new Date().toISOString().slice(0,10);
 function save(){ localStorage.setItem(K.settings,JSON.stringify(S)); localStorage.setItem(K.habits,JSON.stringify(habits)); localStorage.setItem(K.focus,JSON.stringify(focusLog)); localStorage.setItem(K.goals,JSON.stringify(goalsByDay)); }
-function toast(msg){ const box=$('toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(()=>t.remove(), 300); }, 2200); }
+function toast(msg){ const box=$('toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(()=>t.remove(), 260); }, 2200); }
 
-// ======= Options =======
+// ===== Options =====
 $('optSound').checked = S.sound ?? true; $('optNotify').checked = S.notify ?? false; $('optAuto').checked = S.auto ?? true;
 ['optSound','optNotify','optAuto'].forEach(id=>$(id).addEventListener('change',()=>{ S.sound=$('optSound').checked; S.notify=$('optNotify').checked; S.auto=$('optAuto').checked; save(); if(S.notify && Notification && Notification.permission==='default'){ Notification.requestPermission(); } }));
 
-// ======= Pomodoro =======
+// ===== Pomodoro =====
 const focusMin=$('focusMin'), shortMin=$('shortMin'), longMin=$('longMin'), longEvery=$('longEvery');
 [focusMin,shortMin,longMin,longEvery].forEach(el=>el.addEventListener('change',()=>{S.focusMin=+focusMin.value;S.shortMin=+shortMin.value;S.longMin=+longMin.value;S.longEvery=+longEvery.value;save();renderClock();}));
 focusMin.value=S.focusMin||25; shortMin.value=S.shortMin||5; longMin.value=S.longMin||15; longEvery.value=S.longEvery||4;
@@ -217,41 +206,41 @@ function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinu
 $('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
 renderClock();
 
-// ======= Daily Goals =======
+// ===== Daily Goals =====
 function goalsToday(){ const k=todayStr(); if(!goalsByDay[k]) goalsByDay[k]=[]; return goalsByDay[k]; }
 function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; const txt=document.createElement('input'); txt.value=g.text; txt.className='grow'; const del=document.createElement('button'); del.textContent='Delete'; cb.onchange=()=>{ g.done=cb.checked; save(); }; txt.onchange=()=>{ g.text=txt.value; save(); }; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } }; row.append(cb,txt,del); host.appendChild(row); }); }
 $('addGoal').onclick=()=>{ const v=$('goalInput').value.trim(); if(!v) return; goalsToday().push({id:crypto.randomUUID(), text:v, done:false}); $('goalInput').value=''; save(); drawGoals(); toast('Goal added'); };
 drawGoals();
 
-// ======= Habits =======
+// ===== Habits =====
 function lastNDates(n){ const arr=[]; const now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); arr.push(d.toISOString().slice(0,10)); } return arr; }
 function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{ const row=document.createElement('div'); row.className='item'; const name=document.createElement('input'); name.value=h.name; name.className='grow'; name.onchange=()=>{h.name=name.value; save();}; row.appendChild(name); days.forEach(d=>{ const b=document.createElement('button'); b.textContent=h.days&&h.days[d]?'✔':''; b.title=d; b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; save(); drawHabits(); updateViews();}; row.appendChild(b); }); const del=document.createElement('button'); del.textContent='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} }; row.appendChild(del); host.appendChild(row); }); }
 $('addHabit').onclick=()=>{ const v=$('habitInput').value.trim(); if(!v) return; habits.push({id:crypto.randomUUID(), name:v, days:{}}); $('habitInput').value=''; save(); drawHabits(); toast('Habit added'); };
 drawHabits();
 
-// ======= Progress & Weekly =======
+// ===== Progress & Weekly =====
 function focusedLastNDays(n){ const out=[], now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); const k=d.toISOString().slice(0,10); out.push({k,mins:focusLog[k]||0}); } return out; }
 function weekSum(){ return focusedLastNDays(7).reduce((a,b)=>a+b.mins,0); }
 function buildHeat(){ const el=$('heat'); el.innerHTML=''; const data=focusedLastNDays(35); let cur=0; for(let i=data.length-1;i>=0;i--){ if(data[i].mins>0) cur++; else break; } $('kpiStreak').textContent=cur; $('kpiToday').textContent=focusedToday(); $('kpiWeek').textContent=weekSum(); data.forEach(({mins})=>{ const c=document.createElement('div'); c.className='cell ' + (mins>=60?'c4':mins>=30?'c3':mins>=10?'c2':mins>0?'c1':''); el.appendChild(c); }); }
 function drawWeekTable(){ const tb=$('weekTable').querySelector('tbody'); tb.innerHTML=''; focusedLastNDays(7).forEach(({k,mins})=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.textContent=k; const td2=document.createElement('td'); td2.textContent=mins; tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr); }); }
 function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); const data=focusedLastNDays(7).map(x=>x.mins); const w=cvs.width=cvs.clientWidth; const h=cvs.height=cvs.clientHeight; const pad=20; const max=Math.max(60, ...data, 1); const barW=(w-pad*2)/data.length*0.6; const step=(w-pad*2)/data.length; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(2,8,23,.07)'; ctx.fillRect(pad, h-1-pad, w-pad*2, 1); ctx.fillStyle='var(--accent)'; data.forEach((v,i)=>{ const x=pad+i*step+(step-barW)/2; const bh=(h-pad*2)*v/max; const y=h-pad-bh; ctx.beginPath(); const r=6; ctx.moveTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.lineTo(x+barW-r, y); ctx.arcTo(x+barW, y, x+barW, y+r, r); ctx.lineTo(x+barW, y+bh); ctx.lineTo(x, y+bh); ctx.closePath(); ctx.fill(); }); ctx.fillStyle='var(--muted)'; ctx.font='12px Inter, system-ui'; ctx.fillText('Focused minutes (last 7 days)', pad, 14); }
-
 function updateViews(){ buildHeat(); drawWeekTable(); drawChart(); $('minsToday').textContent=focusedToday(); }
 updateViews();
 
-// ======= Export / Import =======
+// ===== Export / Import =====
 $('exportBtn').onclick=()=>{ const blob=new Blob([JSON.stringify({S,habits,focusLog,goalsByDay},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='focusflow-backup.json'; a.click(); toast('Backup saved'); };
 $('importBtn').onclick=()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); Object.assign(S,o.S||{}); habits.splice(0,habits.length,...(o.habits||[])); Object.keys(focusLog).forEach(k=>delete focusLog[k]); Object.assign(focusLog,o.focusLog||{}); Object.assign(goalsByDay,o.goalsByDay||{}); save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } }; r.readAsText(f); }; inp.click(); };
 
-// ======= Shortcuts =======
+// ===== Shortcuts =====
 document.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); if(tag==='input' || tag==='textarea') return; if(e.key.toLowerCase()==='s'){ if(timer) pause(); else start(); } if(e.key.toLowerCase()==='r'){ reset(); } if(e.key.toLowerCase()==='k'){ skip(); } if(e.key.toLowerCase()==='c'){ addFocusMinutes(+focusMin.value); save(); updateViews(); } if(e.key.toLowerCase()==='n'){ $('goalInput').focus(); }});
-</script>
-  <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-  }
-</script>
 
+// ===== PWA install button =====
+let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; });
+$('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; } else { alert('On iPhone: Share → Add to Home Screen. On Android: browser menu → Install app.'); } });
+
+// Register service worker (works after you add sw.js to repo root)
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+</script>
 </body>
 </html>
 
