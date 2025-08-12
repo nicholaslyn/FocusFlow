@@ -260,7 +260,14 @@ function phaseEnded(){
   save(); renderClock();
 }
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); }
-['start','pause','reset','skip','complete'].forEach(id=>$(id).addEventListener('click',()=>setActiveBtn($(id))));
+['start','pause','reset','skip','complete'].forEach(id=>{
+  const fn = id==='start'? start
+            : id==='pause'? pause
+            : id==='reset'? reset
+            : id==='skip'?  skip
+            : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
+  $(id).addEventListener('click', ()=>{ fn(); setActiveBtn($(id)); });
+});
 function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); el.classList.add('primary'); }
 renderClock();
 
@@ -276,8 +283,9 @@ drawGoals();
 
 // ====== Habits ======
 function lastNDates(n){ const arr=[]; const now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); arr.push(d.toISOString().slice(0,10)); } return arr; }
+function weekMonToSun(ref=new Date()){ const d=new Date(ref); const day=d.getDay(); const diff=(day+6)%7; d.setDate(d.getDate()-diff); const arr=[]; for(let i=0;i<7;i++){ const di=new Date(d); di.setDate(d.getDate()+i); arr.push(di.toISOString().slice(0,10)); } return arr; }
 function dayLetter(iso){ try{ return new Date(iso).toLocaleDateString(undefined,{weekday:'short'}).slice(0,1).toUpperCase(); }catch(_){ return '·'; } }
-function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{
+function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=weekMonToSun(); habits.forEach(h=>{
   const row=document.createElement('div'); row.className='item';
   const name=document.createElement('input'); name.type='text'; name.value=h.name; name.placeholder='Habit name'; name.className='grow'; name.oninput=()=>{h.name=name.value; save();};
   const grid=document.createElement('div'); grid.className='days';
