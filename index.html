@@ -4,71 +4,85 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>FocusFlow — Habits & Pomodoro</title>
-<meta name="theme-color" content="#10b981" />
+<meta name="theme-color" content="#0ea5e9" />
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  /* ===== Calm, high-contrast, mobile-first ===== */
+  /* ===== Techy Neon — bold, client-ready visuals (mobile-first) ===== */
   :root{
-    --bg:#ffffff; --panel:#ffffff; --ink:#0f172a; --muted:#475569;
-    --accent:#0f766e; --accent-soft:#ccfbf1; --good:#16a34a; --warn:#f59e0b;
-    --radius:16px; --shadow:0 8px 28px rgba(2,8,23,.08);
-    --ring:#e5e7eb; --ring-fg:#0ea5e9; /* focus ring color */
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b1220; --panel:#0f172a; --ink:#e5e7eb; --muted:#9aa6b2; --ring:#1f2937; --accent-soft:#073b33; }
+    --ink:#E9ECF5;           /* primary text */
+    --muted:#A3B2C9;         /* secondary text */
+    --acc1:#22d3ee;          /* cyan */
+    --acc2:#7c3aed;          /* violet */
+    --good:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+    --radius:18px; --shadow:0 18px 60px rgba(2,8,23,.45);
+    --panel:rgba(17,24,39,.55); /* glass */
+    --border:rgba(255,255,255,.12);
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.88));border-bottom:1px solid rgba(2,8,23,.06);backdrop-filter:blur(8px)}
-  .wrap{max-width:1100px;margin:auto;padding:16px}
+  body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.65 'Plus Jakarta Sans',ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+    background:
+      radial-gradient(1200px 700px at -20% -20%, rgba(34,211,238,.25) 0%, transparent 60%),
+      radial-gradient(1000px 600px at 110% -10%, rgba(124,58,237,.22) 0%, transparent 60%),
+      linear-gradient(180deg,#0b1020 0%, #070b16 60%, #040812 100%);
+  }
+  a{color:inherit}
+  header{position:sticky;top:0;z-index:10;background:rgba(4,8,18,.6);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+  .wrap{max-width:1200px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .brand{font-weight:800;letter-spacing:.3px}
+  .brand{font-weight:800;letter-spacing:.3px;font-size:18px;background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .toggles{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
-  .toggle{display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,8,23,.08);background:#fff}
+  .toggle{display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
 
   main.wrap{display:grid;grid-template-columns:1fr;gap:16px}
-  @media (min-width: 900px){ main.wrap{grid-template-columns:1.1fr .9fr} }
+  @media (min-width: 980px){ main.wrap{grid-template-columns:1.1fr .9fr} }
 
-  .card{background:var(--panel);border:1px solid rgba(2,8,23,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-  h2{margin:0 0 10px;font-size:clamp(16px,2vw,18px)}
+  .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .card::before{content:"";position:absolute;inset:-1px;border-radius:calc(var(--radius)+1px);padding:1px;background:linear-gradient(135deg,rgba(34,211,238,.45),rgba(124,58,237,.45));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}
+
+  h2{margin:0 0 10px;font-size:clamp(16px,2vw,18px);color:#F3F6FF}
   .hint{color:var(--muted);font-size:12px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .stack{display:flex;flex-direction:column;gap:10px}
-  input,select,button{border-radius:12px;border:1px solid rgba(2,8,23,.12);background:#fff;color:var(--ink);padding:10px 12px;font:inherit}
-  button{cursor:pointer;transition:transform .2s ease}
-  button.primary{background:var(--accent);color:#fff;border-color:transparent}
+
+  input,select,button{border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:10px 12px;font:inherit}
+  button{cursor:pointer;transition:transform .18s ease, box-shadow .18s ease, background .18s ease}
+  button.primary{background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;border-color:transparent;box-shadow:0 10px 30px rgba(34,211,238,.25), 0 6px 18px rgba(124,58,237,.25)}
   button.primary:hover{transform:translateY(-1px)}
-  button.ghost{background:#fff}
+  button.ghost{background:rgba(255,255,255,.06)}
 
-  /* Timer with responsive progress ring */
+  /* Timer */
   .timer-wrap{display:grid;place-items:center;margin:8px 0}
-  .ring{position:relative;width:min(78vw,320px);height:min(78vw,320px)}
+  .ring{position:relative;width:min(82vw,340px);height:min(82vw,340px)}
   .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
-  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(28px,10vw,56px)}
-  .phase{color:var(--muted);font-size:12px;text-align:center;margin-top:4px}
+  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(28px,10vw,58px)}
+  .phase{color:var(--muted);font-size:12px;text-align:center;margin-top:6px}
 
-  .list{display:flex;flex-direction:column;gap:8px}
-  .item{display:flex;gap:8px;align-items:center;border:1px solid rgba(2,8,23,.1);border-radius:12px;padding:10px;background:#fff}
-  .grow{flex:1}
-
+  /* KPI & heatmap */
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .kpi{border:1px solid rgba(2,8,23,.08);border-radius:12px;padding:10px;background:#fff}
-  .num{font-weight:800;font-size:clamp(18px,3.5vw,24px)}
+  .kpi{border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.04)}
+  .num{font-weight:800;font-size:clamp(18px,3.5vw,24px);background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .heat{display:grid;grid-template-columns:repeat(35,12px);gap:4px}
-  .cell{width:12px;height:12px;border-radius:3px;background:#e8eef7;border:1px solid rgba(2,8,23,.06)}
-  .c1{background:#c7f2e9}.c2{background:#9fead9}.c3{background:#71dfc6}.c4{background:#43d4b3}
+  .cell{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--border)}
+  .c1{background:#0ea5e955}.c2{background:#7dd3fc77}.c3{background:#60a5fa99}.c4{background:#a78bfaAA}
 
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
-  td,th{border-bottom:1px solid rgba(2,8,23,.06);padding:8px}
-  canvas{width:100%;height:220px;background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:12px}
+  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.04);border-radius:12px;overflow:hidden}
+  td,th{border-bottom:1px solid var(--border);padding:10px}
+  canvas{width:100%;height:220px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px}
 
   /* Toasts & overlay */
   .toasts{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:60}
-  .toast{background:#fff;border:1px solid rgba(2,8,23,.08);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;color:var(--ink)}
-  .overlay{position:fixed;inset:0;background:rgba(2,8,23,.25);display:none;align-items:center;justify-content:center;z-index:50}
-  .overlay .count{font:800 clamp(48px,14vw,84px)/1 Inter;color:#065f46;background:rgba(255,255,255,.9);padding:20px 28px;border-radius:16px;border:1px solid rgba(2,8,23,.08)}
+  .toast{background:rgba(17,24,39,.85);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;color:var(--ink)}
+  .overlay{position:fixed;inset:0;background:rgba(2,8,23,.35);display:none;align-items:center;justify-content:center;z-index:50}
+  .overlay .count{font:800 clamp(48px,14vw,84px)/1 'Plus Jakarta Sans';color:#fff;background:linear-gradient(135deg,rgba(34,211,238,.85),rgba(124,58,237,.85));padding:20px 28px;border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+
+  /* Mobile sticky dock */
+  .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:999px;background:rgba(17,24,39,.65);backdrop-filter:blur(10px);border:1px solid var(--border);box-shadow:var(--shadow);z-index:70}
+  .dock .dclock{font-weight:800}
+  .dock .dphase{color:var(--muted)}
+  @media (min-width:980px){ .dock{display:none} }
 </style>
 </head>
 <body>
@@ -77,7 +91,7 @@
     <div class="brand">FocusFlow</div>
     <div class="toggles">
       <label class="toggle"><input id="optSound" type="checkbox"> sound</label>
-      <label class="toggle">< id="optNotifyLbl"><input id="optNotify" type="checkbox"> notifications</label>
+      <label class="toggle"><input id="optNotify" type="checkbox"> notifications</label>
       <label class="toggle"><input id="optAuto" type="checkbox"> auto-start</label>
       <button id="installBtn" class="toggle" title="Install app">↥ Install</button>
     </div>
@@ -98,8 +112,14 @@
     <div class="timer-wrap">
       <div class="ring">
         <svg viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="46" fill="none" stroke="var(--ring)" stroke-width="8"/>
-          <circle id="ringFg" cx="50" cy="50" r="46" fill="none" stroke="var(--ring-fg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0"/>
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#22d3ee"/>
+              <stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="8"/>
+          <circle id="ringFg" cx="50" cy="50" r="46" fill="none" stroke="url(#ringGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="0"/>
         </svg>
         <div id="clock" class="clock">25:00</div>
       </div>
@@ -108,7 +128,7 @@
 
     <div class="row">
       <button id="start" class="primary">Start</button>
-      <button id="pause">Pause</button>
+      <button id="pause" class="ghost">Pause</button>
       <button id="reset" class="ghost">Reset</button>
       <button id="skip" class="ghost">Skip</button>
       <button id="complete" class="ghost">Complete Focus</button>
@@ -156,8 +176,8 @@
   <section class="card stack">
     <h2>Backup</h2>
     <div class="row">
-      <button id="exportBtn">Export (.json)</button>
-      <button id="importBtn">Import (.json)</button>
+      <button id="exportBtn" class="ghost">Export (.json)</button>
+      <button id="importBtn" class="ghost">Import (.json)</button>
       <span class="hint">Your data stays on this device.</span>
     </div>
   </section>
@@ -165,6 +185,7 @@
 
 <div class="overlay" id="overlay"><div class="count" id="count">3</div></div>
 <div class="toasts" id="toasts"></div>
+<div class="dock" id="dock"><div class="dphase" id="dphase">Ready</div><div class="dclock" id="dclock">25:00</div><button id="dockStart" class="primary">Start</button></div>
 
 <script>
 // ===== Storage & helpers =====
@@ -189,12 +210,12 @@ let mode='focus', timer=null, remaining=0, cycles=0;
 function duration(m){return (m==='focus'?+focusMin.value:m==='short'?+shortMin.value:+longMin.value)*60}
 function mmss(s){const m=Math.floor(s/60),ss=(''+(s%60)).padStart(2,'0');return `${m}:${ss}`}
 const ringLen=2*Math.PI*46; const ring=$('ringFg'); ring.setAttribute('stroke-dasharray', String(ringLen));
-function setRingProgress(){ const total = (mode==='focus'?+focusMin.value:mode==='short'?+shortMin.value:+longMin.value)*60; const p = Math.max(0, Math.min(1, 1 - remaining/total)); ring.style.stroke = (mode==='focus'? 'var(--ring-fg)' : mode==='short'? 'var(--good)' : 'var(--warn)'); ring.style.strokeDashoffset = String(ringLen * (1-p)); }
-function renderClock(){ if(mode==='pause'&&remaining){$('clock').textContent=mmss(remaining);} else { remaining=duration(mode==='pause'?'focus':mode); $('clock').textContent=mmss(remaining);} $('phase').textContent=mode==='focus'?'Focus':mode==='short'?'Break':'Long break'; $('sessionInfo').innerHTML=`${cycles % (+longEvery.value||4)}/${+longEvery.value||4} cycles • Today: <span id="minsToday">${focusedToday()}</span> min`; setRingProgress(); }
-function tick(){ remaining--; $('clock').textContent=mmss(remaining); setRingProgress(); if(remaining<=0){ phaseEnded(); }}
-function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); }
-function pause(){ clearInterval(timer); timer=null; mode='pause'; }
-function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); }
+function setRingProgress(){ const total = (mode==='focus'?+focusMin.value:mode==='short'?+shortMin.value:+longMin.value)*60; const p = Math.max(0, Math.min(1, 1 - remaining/total)); ring.style.strokeDashoffset = String(ringLen * (1-p)); }
+function renderClock(){ if(mode==='pause'&&remaining){$('clock').textContent=mmss(remaining);} else { remaining=duration(mode==='pause'?'focus':mode); $('clock').textContent=mmss(remaining);} $('phase').textContent=mode==='focus'?'Focus':mode==='short'?'Break':'Long break'; $('sessionInfo').innerHTML=`${cycles % (+longEvery.value||4)}/${+longEvery.value||4} cycles • Today: <span id="minsToday">${focusedToday()}</span> min`; setRingProgress(); updateDock(); }
+function tick(){ remaining--; $('clock').textContent=mmss(remaining); setRingProgress(); updateDock(); if(remaining<=0){ phaseEnded(); }}
+function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setInterval(tick,1000); updateDock(); }
+function pause(){ clearInterval(timer); timer=null; mode='pause'; updateDock(); }
+function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); updateDock(); }
 function skip(){ clearInterval(timer); timer=null; nextPhase(true); }
 function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)+mins; save(); toast(`+${mins} min logged`); }
 function focusedToday(){ return focusLog[todayStr()]||0; }
@@ -205,6 +226,10 @@ function phaseEnded(){ clearInterval(timer); timer=null; if(mode==='focus'){ add
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); countdownThen(start); }
 $('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
 renderClock();
+
+// ===== Mobile dock =====
+function updateDock(){ const dclock=$('dclock'), dphase=$('dphase'), btn=$('dockStart'); dclock.textContent = $('clock').textContent; dphase.textContent = (mode==='focus'?'Focus':mode==='short'?'Break':'Long break'); btn.textContent = (timer? 'Pause' : (mode==='pause'?'Start':'Start')); }
+$('dockStart').addEventListener('click', ()=>{ if(timer) pause(); else start(); });
 
 // ===== Daily Goals =====
 function goalsToday(){ const k=todayStr(); if(!goalsByDay[k]) goalsByDay[k]=[]; return goalsByDay[k]; }
@@ -223,7 +248,7 @@ function focusedLastNDays(n){ const out=[], now=new Date(); for(let i=n-1;i>=0;i
 function weekSum(){ return focusedLastNDays(7).reduce((a,b)=>a+b.mins,0); }
 function buildHeat(){ const el=$('heat'); el.innerHTML=''; const data=focusedLastNDays(35); let cur=0; for(let i=data.length-1;i>=0;i--){ if(data[i].mins>0) cur++; else break; } $('kpiStreak').textContent=cur; $('kpiToday').textContent=focusedToday(); $('kpiWeek').textContent=weekSum(); data.forEach(({mins})=>{ const c=document.createElement('div'); c.className='cell ' + (mins>=60?'c4':mins>=30?'c3':mins>=10?'c2':mins>0?'c1':''); el.appendChild(c); }); }
 function drawWeekTable(){ const tb=$('weekTable').querySelector('tbody'); tb.innerHTML=''; focusedLastNDays(7).forEach(({k,mins})=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.textContent=k; const td2=document.createElement('td'); td2.textContent=mins; tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr); }); }
-function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); const data=focusedLastNDays(7).map(x=>x.mins); const w=cvs.width=cvs.clientWidth; const h=cvs.height=cvs.clientHeight; const pad=20; const max=Math.max(60, ...data, 1); const barW=(w-pad*2)/data.length*0.6; const step=(w-pad*2)/data.length; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(2,8,23,.07)'; ctx.fillRect(pad, h-1-pad, w-pad*2, 1); ctx.fillStyle='var(--accent)'; data.forEach((v,i)=>{ const x=pad+i*step+(step-barW)/2; const bh=(h-pad*2)*v/max; const y=h-pad-bh; ctx.beginPath(); const r=6; ctx.moveTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.lineTo(x+barW-r, y); ctx.arcTo(x+barW, y, x+barW, y+r, r); ctx.lineTo(x+barW, y+bh); ctx.lineTo(x, y+bh); ctx.closePath(); ctx.fill(); }); ctx.fillStyle='var(--muted)'; ctx.font='12px Inter, system-ui'; ctx.fillText('Focused minutes (last 7 days)', pad, 14); }
+function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); const data=focusedLastNDays(7).map(x=>x.mins); const w=cvs.width=cvs.clientWidth; const h=cvs.height=cvs.clientHeight; const pad=20; const max=Math.max(60, ...data, 1); const barW=(w-pad*2)/data.length*0.6; const step=(w-pad*2)/data.length; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(pad, h-1-pad, w-pad*2, 1); ctx.fillStyle='#22d3ee'; data.forEach((v,i)=>{ const x=pad+i*step+(step-barW)/2; const bh=(h-pad*2)*v/max; const y=h-pad-bh; ctx.beginPath(); const r=6; ctx.moveTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.lineTo(x+barW-r, y); ctx.arcTo(x+barW, y, x+barW, y+r, r); ctx.lineTo(x+barW, y+bh); ctx.lineTo(x, y+bh); ctx.closePath(); ctx.fill(); }); ctx.fillStyle='var(--muted)'; ctx.font='12px Plus Jakarta Sans, system-ui'; ctx.fillText('Focused minutes (last 7 days)', pad, 14); }
 function updateViews(){ buildHeat(); drawWeekTable(); drawChart(); $('minsToday').textContent=focusedToday(); }
 updateViews();
 
