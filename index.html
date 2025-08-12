@@ -219,7 +219,7 @@
   </section>
 </main>
 
-<div class="overlay" id="overlay"><div class="count" id="count">3</div></div>
+</div>
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -258,21 +258,15 @@ function pause(){ clearInterval(timer); timer=null; mode='pause'; setActiveBtn($
 function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); setActiveBtn($('reset')); }
 function skip(){ clearInterval(timer); timer=null; nextPhase(true); setActiveBtn($('skip')); }
 function addFocusMinutes(mins){
-  const t=todayStr();
-  focusLog[t]=(focusLog[t]||0)+mins;
+  const t = todayStr();
+  focusLog[t] = (focusLog[t]||0) + mins;
   undoStack.push({date:t, mins});
   if(undoStack.length>50) undoStack.shift();
   save(); saveUndo();
   toast(`+${mins} min logged`);
   updateUndoUI();
   syncEditToday();
-});
-  if(undoStack.length>50) undoStack.shift();
-  save(); saveUndo();
-  toast(`+${mins} min logged`);
-  updateUndoUI();
-  syncEditToday();
-
+}
 function focusedToday(){ return focusLog[todayStr()]||0; }
 function phaseEnded(){
   clearInterval(timer); timer=null;
@@ -293,8 +287,7 @@ function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinu
            : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
   $(id).onclick = (e)=>{ e.preventDefault(); fn(); setActiveBtn($(id)); };
 });
-});
-function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); el.classList.add('primary'); }
+function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); if(el) el.classList.add('primary'); }
 renderClock();
 
 // ====== Daily Goals ======
