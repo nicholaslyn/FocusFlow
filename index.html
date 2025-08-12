@@ -197,6 +197,13 @@
       <div class="kpi"><div class="num" id="kpiWeek">0</div><div class="hint">Focused minutes this week</div></div>
     </div>
     <div id="heat" class="heat" aria-label="Streak heatmap"></div>
+    <div class="row">
+      <label>Today <input id="editTodayMins" type="number" min="0" inputmode="numeric" value="0"> min</label>
+      <button id="saveTodayMins" class="ghost">Save</button>
+      <button id="clearToday" class="ghost">Clear today</button>
+      <button id="undoBtn" class="ghost">Undo last log</button>
+    </div>
+    <div class="hint">Tip: tap a number in the weekly table to edit it.</div>
     <table id="weekTable"><thead><tr><th>Date</th><th>Focused minutes</th></tr></thead><tbody></tbody></table>
     <canvas id="chart"></canvas>
   </section>
@@ -222,6 +229,9 @@ const S=JSON.parse(localStorage.getItem(K.settings)||'{}');
 const habits=JSON.parse(localStorage.getItem(K.habits)||'[]');
 const focusLog=JSON.parse(localStorage.getItem(K.focus)||'{}');
 const goalsByDay=JSON.parse(localStorage.getItem(K.goals)||'{}');
+const UNDO_K='ff_undo_v1';
+const undoStack=JSON.parse(localStorage.getItem(UNDO_K)||'[]');
+function saveUndo(){ localStorage.setItem(UNDO_K, JSON.stringify(undoStack)); }
 const $=id=>document.getElementById(id); const todayStr=()=>new Date().toISOString().slice(0,10);
 function save(){ localStorage.setItem(K.settings,JSON.stringify(S)); localStorage.setItem(K.habits,JSON.stringify(habits)); localStorage.setItem(K.focus,JSON.stringify(focusLog)); localStorage.setItem(K.goals,JSON.stringify(goalsByDay)); }
 function toast(msg){ const box=$('toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(()=>t.remove(), 260); }, 2200); }
@@ -247,7 +257,16 @@ function start(){ if(timer) return; if(mode==='pause') mode='focus'; timer=setIn
 function pause(){ clearInterval(timer); timer=null; mode='pause'; setActiveBtn($('pause')); }
 function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; renderClock(); setActiveBtn($('reset')); }
 function skip(){ clearInterval(timer); timer=null; nextPhase(true); setActiveBtn($('skip')); }
-function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)+mins; save(); toast(`+${mins} min logged`); }
+function addFocusMinutes(mins){
+  const t=todayStr();
+  focusLog[t]=(focusLog[t]||0)+mins;
+  undoStack.push({date:t, mins});
+  if(undoStack.length>50) undoStack.shift();
+  save(); saveUndo();
+  toast(`+${mins} min logged`);
+  updateUndoUI();
+  syncEditToday();
+} min logged`); }
 function focusedToday(){ return focusLog[todayStr()]||0; }
 function phaseEnded(){
   clearInterval(timer); timer=null;
@@ -265,7 +284,15 @@ function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinu
             : id==='pause'? pause
             : id==='reset'? reset
             : id==='skip'?  skip
-            : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
+            : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews();
+
+// === Adjust/Undo controls ===
+function updateUndoUI(){ const b=$('undoBtn'); if(!b) return; const last=undoStack[undoStack.length-1]; b.disabled=!last; b.textContent = last? `Undo last +${last.mins}m` : 'Undo last log'; }
+function syncEditToday(){ const et=$('editTodayMins'); if(et) et.value = focusedToday(); }
+const saveBtn=$('saveTodayMins'); if(saveBtn) saveBtn.onclick=()=>{ const n=Math.max(0, +$('editTodayMins').value||0); focusLog[todayStr()] = n; save(); updateViews(); toast('Today updated'); };
+const clearBtn=$('clearToday'); if(clearBtn) clearBtn.onclick=()=>{ focusLog[todayStr()] = 0; save(); updateViews(); toast('Today cleared'); };
+const undoBtnEl=$('undoBtn'); if(undoBtnEl) undoBtnEl.onclick=()=>{ const last=undoStack.pop(); if(!last){ toast('Nothing to undo'); return; } focusLog[last.date]=Math.max(0,(focusLog[last.date]||0)-last.mins); save(); saveUndo(); updateViews(); toast(`Removed ${last.mins} min`); };
+updateUndoUI(); };
   $(id).addEventListener('click', ()=>{ fn(); setActiveBtn($(id)); });
 });
 function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); el.classList.add('primary'); }
@@ -303,9 +330,31 @@ drawHabits();
 function focusedLastNDays(n){ const out=[], now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); const k=d.toISOString().slice(0,10); out.push({k,mins:focusLog[k]||0}); } return out; }
 function weekSum(){ return focusedLastNDays(7).reduce((a,b)=>a+b.mins,0); }
 function buildHeat(){ const el=$('heat'); el.innerHTML=''; const data=focusedLastNDays(35); let cur=0; for(let i=data.length-1;i>=0;i--){ if(data[i].mins>0) cur++; else break; } $('kpiStreak').textContent=cur; $('kpiToday').textContent=focusedToday(); $('kpiWeek').textContent=weekSum(); data.forEach(({mins})=>{ const c=document.createElement('div'); c.className='cell ' + (mins>=60?'c4':mins>=30?'c3':mins>=10?'c2':mins>0?'c1':''); el.appendChild(c); }); }
-function drawWeekTable(){ const tb=$('weekTable').querySelector('tbody'); tb.innerHTML=''; focusedLastNDays(7).forEach(({k,mins})=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.textContent=k; const td2=document.createElement('td'); td2.textContent=mins; tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr); }); }
+function drawWeekTable(){
+  const tb=$('weekTable').querySelector('tbody');
+  tb.innerHTML='';
+  focusedLastNDays(7).forEach(({k,mins})=>{
+    const tr=document.createElement('tr');
+    const td1=document.createElement('td'); td1.textContent=k;
+    const td2=document.createElement('td'); td2.textContent=mins; td2.style.cursor='pointer'; td2.title='Tap to edit';
+    td2.onclick=()=>{
+      const v=prompt(`Set focused minutes for ${k}`, String(focusLog[k]||0));
+      if(v==null) return; const n=Math.max(0, +v || 0);
+      focusLog[k]=n; save(); updateViews(); if(k===todayStr()){ const et=$('editTodayMins'); if(et) et.value=n; }
+      toast('Updated');
+    };
+    tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr);
+  });
+})=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.textContent=k; const td2=document.createElement('td'); td2.textContent=mins; tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr); }); }
 function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); const data=focusedLastNDays(7).map(x=>x.mins); const w=cvs.width=cvs.clientWidth; const h=cvs.height=cvs.clientHeight; const pad=20; const max=Math.max(60, ...data, 1); const barW=(w-pad*2)/data.length*0.6; const step=(w-pad*2)/data.length; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(pad, h-1-pad, w-pad*2, 1); ctx.fillStyle='#22d3ee'; data.forEach((v,i)=>{ const x=pad+i*step+(step-barW)/2; const bh=(h-pad*2)*v/max; const y=h-pad-bh; ctx.beginPath(); const r=6; ctx.moveTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.lineTo(x+barW-r, y); ctx.arcTo(x+barW, y, x+barW, y+r, r); ctx.lineTo(x+barW, y+bh); ctx.lineTo(x, y+bh); ctx.closePath(); ctx.fill(); }); ctx.fillStyle='var(--muted)'; ctx.font='12px Plus Jakarta Sans, system-ui'; ctx.fillText('Focused minutes (last 7 days)', pad, 14); }
-function updateViews(){ buildHeat(); drawWeekTable(); drawChart(); $('minsToday').textContent=focusedToday(); }
+function updateViews(){
+  buildHeat();
+  drawWeekTable();
+  drawChart();
+  $('minsToday').textContent=focusedToday();
+  syncEditToday();
+  updateUndoUI();
+}
 updateViews();
 
 // ====== Export / Import ======
