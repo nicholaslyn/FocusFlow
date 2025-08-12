@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>FocusFlow — Habits & Pomodoro</title>
+<title>FocusFlow — Focus Sessions & Habits</title>
 <meta name="theme-color" content="#0ea5e9" />
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,8 +36,6 @@
   .wrap{max-width:1200px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{font-weight:800;letter-spacing:.3px;font-size:18px;background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .toggles{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
-  .toggle{display:flex;gap:6px;align-items:center;padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
 
   /* Tabs for mobile: one section at a time */
   .tabs{position:sticky;top:62px;z-index:15;display:flex;gap:8px;overflow:auto;padding:10px 16px;background:rgba(4,8,18,.55);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
@@ -48,11 +46,16 @@
   @media (min-width: 980px){ body{padding-bottom:0} .tabs{display:none} main.wrap{grid-template-columns:1.1fr .9fr} }
 
   .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-  .card::before{content:"";position:absolute;inset:-1px;border-radius:calc(var(--radius)+1px);padding:1px;background:linear-gradient(135deg,rgba(34,211,238,.45),rgba(124,58,237,.45));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}
+  .card::before{content:"";position:absolute;inset:-1px;border-radius:calc(var(--radius)+1px);padding:1px;background:linear-gradient(135deg,rgba(34,211,238,.45),rgba(124,58,237,.45));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 
   h2{margin:0 0 12px;font-size:clamp(18px,2vw,20px);color:#F3F6FF}
   .hint{color:var(--muted);font-size:13px}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  /* Timer controls grid on small screens */
+  #sec-timer .row:first-of-type{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #sec-timer .row:first-of-type label{display:grid;grid-template-columns:1fr 96px;align-items:center}
+  #sec-timer .row:first-of-type input{width:100%;text-align:center}
+  @media (min-width:700px){#sec-timer .row:first-of-type{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .stack{display:flex;flex-direction:column;gap:12px}
 
   /* Better tap targets & mobile keyboard */
@@ -102,15 +105,9 @@
 <header>
   <div class="wrap hrow">
     <div class="brand">FocusFlow</div>
-    <div class="toggles">
-      <label class="toggle"><input id="optSound" type="checkbox"> sound</label>
-      <label class="toggle"><input id="optNotify" type="checkbox"> notifications</label>
-      <label class="toggle"><input id="optAuto" type="checkbox"> auto-start</label>
-      <button id="installBtn" class="toggle" title="Install app">↥ Install</button>
-    </div>
   </div>
   <div class="tabs" id="tabs">
-    <button data-tab="timer" class="active">Timer</button>
+    <button data-tab="timer" class="active">Focus Timer</button>
     <button data-tab="goals">Goals</button>
     <button data-tab="habits">Habits</button>
     <button data-tab="progress">Progress</button>
@@ -119,14 +116,14 @@
 </header>
 
 <main class="wrap">
-  <!-- Pomodoro card -->
+  <!-- Focus Sessions card -->
   <section id="sec-timer" class="card stack" data-panel="timer">
-    <h2>Pomodoro</h2>
+    <h2>Focus Sessions</h2>
     <div class="row">
-      <label>Focus <input id="focusMin" type="number" min="5" value="25" inputmode="numeric"> min</label>
-      <label>Short <input id="shortMin" type="number" min="1" value="5" inputmode="numeric"> min</label>
-      <label>Long <input id="longMin" type="number" min="5" value="15" inputmode="numeric"> min</label>
-      <label>Long every <input id="longEvery" type="number" min="2" value="4" inputmode="numeric"> cycles</label>
+      <label>Focus length <input id="focusMin" type="number" min="5" value="25" inputmode="numeric" autocomplete="off"> min</label>
+      <label>Short break <input id="shortMin" type="number" min="1" value="5" inputmode="numeric" autocomplete="off"> min</label>
+      <label>Long break <input id="longMin" type="number" min="5" value="15" inputmode="numeric" autocomplete="off"> min</label>
+      <label>Long break every <input id="longEvery" type="number" min="2" value="4" inputmode="numeric" autocomplete="off"> sessions</label>
     </div>
 
     <div class="timer-wrap">
@@ -154,7 +151,7 @@
       <button id="complete" class="ghost">Complete Focus</button>
       <span id="sessionInfo" style="margin-left:auto" class="hint">0/4 cycles • Today: <span id="minsToday">0</span> min</span>
     </div>
-    <div class="hint">Shortcuts: <b>S</b> start/pause • <b>R</b> reset • <b>K</b> skip • <b>C</b> complete • <b>N</b> new goal</div>
+    <div class="hint">Pomodoro = 25‑min focus + 5‑min break. Adjust lengths above.</div>
   </section>
 
   <!-- Daily Goals -->
@@ -217,13 +214,9 @@ function setTab(tab){ currentTab=tab; for(const btn of tabs.querySelectorAll('bu
 setTab('timer'); tabs.addEventListener('click',(e)=>{ const b=e.target.closest('button[data-tab]'); if(!b) return; setTab(b.dataset.tab); });
 window.addEventListener('resize', ()=>setTab(currentTab));
 
-// ====== Options ======
-$('optSound').checked = S.sound ?? true; $('optNotify').checked = S.notify ?? false; $('optAuto').checked = S.auto ?? true;
-['optSound','optNotify','optAuto'].forEach(id=>$(id).addEventListener('change',()=>{ S.sound=$('optSound').checked; S.notify=$('optNotify').checked; S.auto=$('optAuto').checked; save(); if(S.notify && Notification && Notification.permission==='default'){ Notification.requestPermission(); } }));
-
-// ====== Pomodoro ======
+// ====== Focus Sessions (Pomodoro) ======
 const focusMin=$('focusMin'), shortMin=$('shortMin'), longMin=$('longMin'), longEvery=$('longEvery');
-[focusMin,shortMin,longMin,longEvery].forEach(el=>el.addEventListener('change',()=>{S.focusMin=+focusMin.value;S.shortMin=+shortMin.value;S.longMin=+longMin.value;S.longEvery=+longEvery.value;save();renderClock();}));
+[focusMin,shortMin,longMin,longEvery].forEach(el=>el.addEventListener('input',()=>{S.focusMin=+focusMin.value;S.shortMin=+shortMin.value;S.longMin=+longMin.value;S.longEvery=+longEvery.value;save();renderClock();}));
 focusMin.value=S.focusMin||25; shortMin.value=S.shortMin||5; longMin.value=S.longMin||15; longEvery.value=S.longEvery||4;
 let mode='focus', timer=null, remaining=0, cycles=0;
 function duration(m){return (m==='focus'?+focusMin.value:m==='short'?+shortMin.value:+longMin.value)*60}
@@ -238,11 +231,17 @@ function reset(){ clearInterval(timer); timer=null; mode='focus'; cycles=0; rend
 function skip(){ clearInterval(timer); timer=null; nextPhase(true); }
 function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)+mins; save(); toast(`+${mins} min logged`); }
 function focusedToday(){ return focusLog[todayStr()]||0; }
-function notifyUser(title, body){ if(S.sound) beep(); if(S.notify && 'Notification' in window){ if(Notification.permission==='granted') new Notification(title,{body}); else if(Notification.permission==='default') Notification.requestPermission().then(p=>{ if(p==='granted') new Notification(title,{body}); }); } }
-function beep(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0.001,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.2,ctx.currentTime+0.01); o.start(); o.stop(ctx.currentTime+0.25); }catch(_){}}
-function countdownThen(fn){ if(!$('optAuto').checked){ fn(); return; } const overlay=$('overlay'); const count=$('count'); let n=3; count.textContent=n; overlay.style.display='flex'; overlay.style.pointerEvents='auto'; const t=setInterval(()=>{ n--; count.textContent=n; if(n<=0){ clearInterval(t); overlay.style.display='none'; overlay.style.pointerEvents='none'; fn(); } },1000); }
-function phaseEnded(){ clearInterval(timer); timer=null; if(mode==='focus'){ addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; notifyUser('Focus complete','Time for a break'); } else { mode='focus'; notifyUser('Break over','Back to focus'); } save(); renderClock(); countdownThen(start); }
-function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); countdownThen(start); }
+function phaseEnded(){
+  clearInterval(timer); timer=null;
+  if(mode==='focus'){
+    addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short';
+    toast('Focus complete — tap Start to begin your break');
+  } else {
+    mode='focus'; toast('Break over — tap Start to begin focus');
+  }
+  save(); renderClock();
+}
+function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); }
 $('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
 renderClock();
 
@@ -278,11 +277,7 @@ $('importBtn').onclick=()=>{ const inp=document.createElement('input'); inp.type
 // ====== Shortcuts ======
 document.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); if(tag==='input' || tag==='textarea') return; if(e.key.toLowerCase()==='s'){ if(timer) pause(); else start(); } if(e.key.toLowerCase()==='r'){ reset(); } if(e.key.toLowerCase()==='k'){ skip(); } if(e.key.toLowerCase()==='c'){ addFocusMinutes(+focusMin.value); save(); updateViews(); } if(e.key.toLowerCase()==='n'){ $('goalInput').focus(); }});
 
-// ====== PWA install button ======
-let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; });
-$('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; } else { alert('On iPhone: Share → Add to Home Screen. On Android: browser menu → Install app.'); } });
-
-// Register service worker
+// Register service worker (kept for offline support)
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
