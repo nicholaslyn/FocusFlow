@@ -76,7 +76,7 @@
 
   /* Timer */
   .timer-wrap{display:grid;place-items:center;margin:6px 0 12px}
-  .ring{position:relative;width:min(82vw,360px);height:min(82vw,360px)}
+  .ring{position:relative;width:min(82vw,360px);height:min(82vw,360px);pointer-events:none}
   .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
   .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(30px,10vw,60px)}
   .phase{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
@@ -266,7 +266,13 @@ function addFocusMinutes(mins){
   toast(`+${mins} min logged`);
   updateUndoUI();
   syncEditToday();
-} min logged`); }
+});
+  if(undoStack.length>50) undoStack.shift();
+  save(); saveUndo();
+  toast(`+${mins} min logged`);
+  updateUndoUI();
+  syncEditToday();
+
 function focusedToday(){ return focusLog[todayStr()]||0; }
 function phaseEnded(){
   clearInterval(timer); timer=null;
@@ -280,20 +286,13 @@ function phaseEnded(){
 }
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); }
 ['start','pause','reset','skip','complete'].forEach(id=>{
-  const fn = id==='start'? start
-            : id==='pause'? pause
-            : id==='reset'? reset
-            : id==='skip'?  skip
-            : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews();
-
-// === Adjust/Undo controls ===
-function updateUndoUI(){ const b=$('undoBtn'); if(!b) return; const last=undoStack[undoStack.length-1]; b.disabled=!last; b.textContent = last? `Undo last +${last.mins}m` : 'Undo last log'; }
-function syncEditToday(){ const et=$('editTodayMins'); if(et) et.value = focusedToday(); }
-const saveBtn=$('saveTodayMins'); if(saveBtn) saveBtn.onclick=()=>{ const n=Math.max(0, +$('editTodayMins').value||0); focusLog[todayStr()] = n; save(); updateViews(); toast('Today updated'); };
-const clearBtn=$('clearToday'); if(clearBtn) clearBtn.onclick=()=>{ focusLog[todayStr()] = 0; save(); updateViews(); toast('Today cleared'); };
-const undoBtnEl=$('undoBtn'); if(undoBtnEl) undoBtnEl.onclick=()=>{ const last=undoStack.pop(); if(!last){ toast('Nothing to undo'); return; } focusLog[last.date]=Math.max(0,(focusLog[last.date]||0)-last.mins); save(); saveUndo(); updateViews(); toast(`Removed ${last.mins} min`); };
-updateUndoUI(); };
-  $(id).addEventListener('click', ()=>{ fn(); setActiveBtn($(id)); });
+  const fn = id==='start' ? start
+           : id==='pause' ? pause
+           : id==='reset' ? reset
+           : id==='skip'  ? skip
+           : ()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
+  $(id).onclick = (e)=>{ e.preventDefault(); fn(); setActiveBtn($(id)); };
+});
 });
 function setActiveBtn(el){ ['start','pause','reset','skip','complete'].forEach(id=>$(id).classList.remove('primary')); el.classList.add('primary'); }
 renderClock();
@@ -345,7 +344,7 @@ function drawWeekTable(){
     };
     tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr);
   });
-})=>{ const tr=document.createElement('tr'); const td1=document.createElement('td'); td1.textContent=k; const td2=document.createElement('td'); td2.textContent=mins; tr.appendChild(td1); tr.appendChild(td2); tb.appendChild(tr); }); }
+}
 function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); const data=focusedLastNDays(7).map(x=>x.mins); const w=cvs.width=cvs.clientWidth; const h=cvs.height=cvs.clientHeight; const pad=20; const max=Math.max(60, ...data, 1); const barW=(w-pad*2)/data.length*0.6; const step=(w-pad*2)/data.length; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(pad, h-1-pad, w-pad*2, 1); ctx.fillStyle='#22d3ee'; data.forEach((v,i)=>{ const x=pad+i*step+(step-barW)/2; const bh=(h-pad*2)*v/max; const y=h-pad-bh; ctx.beginPath(); const r=6; ctx.moveTo(x, y+r); ctx.arcTo(x, y, x+r, y, r); ctx.lineTo(x+barW-r, y); ctx.arcTo(x+barW, y, x+barW, y+r, r); ctx.lineTo(x+barW, y+bh); ctx.lineTo(x, y+bh); ctx.closePath(); ctx.fill(); }); ctx.fillStyle='var(--muted)'; ctx.font='12px Plus Jakarta Sans, system-ui'; ctx.fillText('Focused minutes (last 7 days)', pad, 14); }
 function updateViews(){
   buildHeat();
@@ -356,6 +355,14 @@ function updateViews(){
   updateUndoUI();
 }
 updateViews();
+
+// === Adjust/Undo controls ===
+function updateUndoUI(){ const b=$('undoBtn'); if(!b) return; const last=undoStack[undoStack.length-1]; b.disabled=!last; b.textContent = last? `Undo last +${last.mins}m` : 'Undo last log'; }
+function syncEditToday(){ const et=$('editTodayMins'); if(et) et.value = focusedToday(); }
+const saveBtn=$('saveTodayMins'); if(saveBtn) saveBtn.onclick=()=>{ const n=Math.max(0, +$('editTodayMins').value||0); focusLog[todayStr()] = n; save(); updateViews(); toast('Today updated'); };
+const clearBtn=$('clearToday'); if(clearBtn) clearBtn.onclick=()=>{ focusLog[todayStr()] = 0; save(); updateViews(); toast('Today cleared'); };
+const undoBtnEl=$('undoBtn'); if(undoBtnEl) undoBtnEl.onclick=()=>{ const last=undoStack.pop(); if(!last){ toast('Nothing to undo'); return; } focusLog[last.date]=Math.max(0,(focusLog[last.date]||0)-last.mins); save(); saveUndo(); updateViews(); toast(`Removed ${last.mins} min`); };
+updateUndoUI();
 
 // ====== Export / Import ======
 $('exportBtn').onclick=()=>{ const blob=new Blob([JSON.stringify({S,habits,focusLog,goalsByDay},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='focusflow-backup.json'; a.click(); toast('Backup saved'); };
@@ -369,3 +376,4 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>
+
