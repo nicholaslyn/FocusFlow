@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>FocusFlow — Habits & Pomodoro</title>
 <meta name="theme-color" content="#0ea5e9" />
 <link rel="manifest" href="manifest.json">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  /* ===== Techy Neon — bold, client-ready visuals (mobile-first) ===== */
+  /* ===== Techy Neon — premium visuals (mobile-first) ===== */
   :root{
     --ink:#E9ECF5;           /* primary text */
     --muted:#A3B2C9;         /* secondary text */
@@ -22,43 +22,56 @@
     --border:rgba(255,255,255,.12);
   }
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.65 'Plus Jakarta Sans',ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+  html,body{height:100%}
+  body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.7 'Plus Jakarta Sans',ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
     background:
       radial-gradient(1200px 700px at -20% -20%, rgba(34,211,238,.25) 0%, transparent 60%),
       radial-gradient(1000px 600px at 110% -10%, rgba(124,58,237,.22) 0%, transparent 60%),
       linear-gradient(180deg,#0b1020 0%, #070b16 60%, #040812 100%);
+    padding-bottom:96px; /* space for dock on mobile */
+    -webkit-text-size-adjust: 100%;
   }
   a{color:inherit}
-  header{position:sticky;top:0;z-index:10;background:rgba(4,8,18,.6);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+  header{position:sticky;top:0;z-index:20;background:rgba(4,8,18,.6);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
   .wrap{max-width:1200px;margin:auto;padding:16px}
   .hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{font-weight:800;letter-spacing:.3px;font-size:18px;background:linear-gradient(90deg,var(--acc1),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .toggles{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
-  .toggle{display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
+  .toggle{display:flex;gap:6px;align-items:center;padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
+
+  /* Tabs for mobile: one section at a time */
+  .tabs{position:sticky;top:62px;z-index:15;display:flex;gap:8px;overflow:auto;padding:10px 16px;background:rgba(4,8,18,.55);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  .tabs button{flex:1;min-width:120px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:10px 14px}
+  .tabs button.active{background:linear-gradient(135deg,var(--acc1),var(--acc2));border-color:transparent;color:#fff}
 
   main.wrap{display:grid;grid-template-columns:1fr;gap:16px}
-  @media (min-width: 980px){ main.wrap{grid-template-columns:1.1fr .9fr} }
+  @media (min-width: 980px){ body{padding-bottom:0} .tabs{display:none} main.wrap{grid-template-columns:1.1fr .9fr} }
 
-  .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
   .card::before{content:"";position:absolute;inset:-1px;border-radius:calc(var(--radius)+1px);padding:1px;background:linear-gradient(135deg,rgba(34,211,238,.45),rgba(124,58,237,.45));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}
 
-  h2{margin:0 0 10px;font-size:clamp(16px,2vw,18px);color:#F3F6FF}
-  .hint{color:var(--muted);font-size:12px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .stack{display:flex;flex-direction:column;gap:10px}
+  h2{margin:0 0 12px;font-size:clamp(18px,2vw,20px);color:#F3F6FF}
+  .hint{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .stack{display:flex;flex-direction:column;gap:12px}
 
-  input,select,button{border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:10px 12px;font:inherit}
+  /* Better tap targets & mobile keyboard */
+  input,select,button{border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--ink);padding:12px 14px;font:inherit;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  input,textarea{width:100%}
+  input[type=number]{-moz-appearance:textfield}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]{inputmode:numeric}
   button{cursor:pointer;transition:transform .18s ease, box-shadow .18s ease, background .18s ease}
   button.primary{background:linear-gradient(135deg,var(--acc1),var(--acc2));color:#fff;border-color:transparent;box-shadow:0 10px 30px rgba(34,211,238,.25), 0 6px 18px rgba(124,58,237,.25)}
   button.primary:hover{transform:translateY(-1px)}
   button.ghost{background:rgba(255,255,255,.06)}
 
   /* Timer */
-  .timer-wrap{display:grid;place-items:center;margin:8px 0}
-  .ring{position:relative;width:min(82vw,340px);height:min(82vw,340px)}
+  .timer-wrap{display:grid;place-items:center;margin:4px 0 10px}
+  .ring{position:relative;width:min(82vw,360px);height:min(82vw,360px)}
   .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
-  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(28px,10vw,58px)}
-  .phase{color:var(--muted);font-size:12px;text-align:center;margin-top:6px}
+  .ring .clock{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:clamp(30px,10vw,60px)}
+  .phase{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
 
   /* KPI & heatmap */
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -75,11 +88,11 @@
   /* Toasts & overlay */
   .toasts{position:fixed;right:12px;bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:60}
   .toast{background:rgba(17,24,39,.85);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px;color:var(--ink)}
-  .overlay{position:fixed;inset:0;background:rgba(2,8,23,.35);display:none;align-items:center;justify-content:center;z-index:50}
+  .overlay{position:fixed;inset:0;background:rgba(2,8,23,.35);display:none;align-items:center;justify-content:center;z-index:100;pointer-events:none}
   .overlay .count{font:800 clamp(48px,14vw,84px)/1 'Plus Jakarta Sans';color:#fff;background:linear-gradient(135deg,rgba(34,211,238,.85),rgba(124,58,237,.85));padding:20px 28px;border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.45)}
 
   /* Mobile sticky dock */
-  .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:999px;background:rgba(17,24,39,.65);backdrop-filter:blur(10px);border:1px solid var(--border);box-shadow:var(--shadow);z-index:70}
+  .dock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:999px;background:rgba(17,24,39,.75);backdrop-filter:blur(10px);border:1px solid var(--border);box-shadow:var(--shadow);z-index:70}
   .dock .dclock{font-weight:800}
   .dock .dphase{color:var(--muted)}
   @media (min-width:980px){ .dock{display:none} }
@@ -96,17 +109,24 @@
       <button id="installBtn" class="toggle" title="Install app">↥ Install</button>
     </div>
   </div>
+  <div class="tabs" id="tabs">
+    <button data-tab="timer" class="active">Timer</button>
+    <button data-tab="goals">Goals</button>
+    <button data-tab="habits">Habits</button>
+    <button data-tab="progress">Progress</button>
+    <button data-tab="backup">Backup</button>
+  </div>
 </header>
 
 <main class="wrap">
   <!-- Pomodoro card -->
-  <section class="card stack">
+  <section id="sec-timer" class="card stack" data-panel="timer">
     <h2>Pomodoro</h2>
     <div class="row">
-      <label>Focus <input id="focusMin" type="number" min="5" value="25"> min</label>
-      <label>Short <input id="shortMin" type="number" min="1" value="5"> min</label>
-      <label>Long <input id="longMin" type="number" min="5" value="15"> min</label>
-      <label>Long every <input id="longEvery" type="number" min="2" value="4"> cycles</label>
+      <label>Focus <input id="focusMin" type="number" min="5" value="25" inputmode="numeric"> min</label>
+      <label>Short <input id="shortMin" type="number" min="1" value="5" inputmode="numeric"> min</label>
+      <label>Long <input id="longMin" type="number" min="5" value="15" inputmode="numeric"> min</label>
+      <label>Long every <input id="longEvery" type="number" min="2" value="4" inputmode="numeric"> cycles</label>
     </div>
 
     <div class="timer-wrap">
@@ -138,14 +158,14 @@
   </section>
 
   <!-- Daily Goals -->
-  <section class="card stack">
+  <section id="sec-goals" class="card stack" data-panel="goals">
     <h2>Daily Goals</h2>
     <div class="row"><input id="goalInput" class="grow" placeholder="Add a goal for today…"><button id="addGoal" class="primary">Add</button></div>
     <div id="goalList" class="list"></div>
   </section>
 
   <!-- Habits -->
-  <section class="card stack">
+  <section id="sec-habits" class="card stack" data-panel="habits">
     <h2>Habits (last 7 days)</h2>
     <div class="row">
       <input id="habitInput" class="grow" placeholder="Add habit (e.g., Read 20m)">
@@ -155,7 +175,7 @@
   </section>
 
   <!-- Progress -->
-  <section class="card stack">
+  <section id="sec-progress" class="card stack" data-panel="progress">
     <h2>Progress — last 35 days</h2>
     <div class="kpis">
       <div class="kpi"><div class="num" id="kpiStreak">0</div><div class="hint">Current streak (days)</div></div>
@@ -165,15 +185,8 @@
     <div id="heat" class="heat" aria-label="Streak heatmap"></div>
   </section>
 
-  <!-- Weekly report -->
-  <section class="card stack">
-    <h2>Weekly Report</h2>
-    <table id="weekTable"><thead><tr><th>Date</th><th>Focused minutes</th></tr></thead><tbody></tbody></table>
-    <canvas id="chart"></canvas>
-  </section>
-
   <!-- Backup -->
-  <section class="card stack">
+  <section id="sec-backup" class="card stack" data-panel="backup">
     <h2>Backup</h2>
     <div class="row">
       <button id="exportBtn" class="ghost">Export (.json)</button>
@@ -188,7 +201,7 @@
 <div class="dock" id="dock"><div class="dphase" id="dphase">Ready</div><div class="dclock" id="dclock">25:00</div><button id="dockStart" class="primary">Start</button></div>
 
 <script>
-// ===== Storage & helpers =====
+// ====== Helpers & State ======
 const K={settings:'ff_settings', habits:'ff_habits_v3', focus:'ff_focus_log_v3', goals:'ff_goals_v1'};
 const S=JSON.parse(localStorage.getItem(K.settings)||'{}');
 const habits=JSON.parse(localStorage.getItem(K.habits)||'[]');
@@ -198,11 +211,17 @@ const $=id=>document.getElementById(id); const todayStr=()=>new Date().toISOStri
 function save(){ localStorage.setItem(K.settings,JSON.stringify(S)); localStorage.setItem(K.habits,JSON.stringify(habits)); localStorage.setItem(K.focus,JSON.stringify(focusLog)); localStorage.setItem(K.goals,JSON.stringify(goalsByDay)); }
 function toast(msg){ const box=$('toasts'); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; box.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(6px)'; setTimeout(()=>t.remove(), 260); }, 2200); }
 
-// ===== Options =====
+// ====== Tabs (mobile) ======
+const tabs=$('tabs'); let currentTab='timer';
+function setTab(tab){ currentTab=tab; for(const btn of tabs.querySelectorAll('button')) btn.classList.toggle('active', btn.dataset.tab===tab); for(const sec of document.querySelectorAll('[data-panel]')){ const show = sec.dataset.panel===tab || window.matchMedia('(min-width:980px)').matches; sec.style.display = show ? '' : 'none'; } }
+setTab('timer'); tabs.addEventListener('click',(e)=>{ const b=e.target.closest('button[data-tab]'); if(!b) return; setTab(b.dataset.tab); });
+window.addEventListener('resize', ()=>setTab(currentTab));
+
+// ====== Options ======
 $('optSound').checked = S.sound ?? true; $('optNotify').checked = S.notify ?? false; $('optAuto').checked = S.auto ?? true;
 ['optSound','optNotify','optAuto'].forEach(id=>$(id).addEventListener('change',()=>{ S.sound=$('optSound').checked; S.notify=$('optNotify').checked; S.auto=$('optAuto').checked; save(); if(S.notify && Notification && Notification.permission==='default'){ Notification.requestPermission(); } }));
 
-// ===== Pomodoro =====
+// ====== Pomodoro ======
 const focusMin=$('focusMin'), shortMin=$('shortMin'), longMin=$('longMin'), longEvery=$('longEvery');
 [focusMin,shortMin,longMin,longEvery].forEach(el=>el.addEventListener('change',()=>{S.focusMin=+focusMin.value;S.shortMin=+shortMin.value;S.longMin=+longMin.value;S.longEvery=+longEvery.value;save();renderClock();}));
 focusMin.value=S.focusMin||25; shortMin.value=S.shortMin||5; longMin.value=S.longMin||15; longEvery.value=S.longEvery||4;
@@ -221,29 +240,29 @@ function addFocusMinutes(mins){ const t=todayStr(); focusLog[t]=(focusLog[t]||0)
 function focusedToday(){ return focusLog[todayStr()]||0; }
 function notifyUser(title, body){ if(S.sound) beep(); if(S.notify && 'Notification' in window){ if(Notification.permission==='granted') new Notification(title,{body}); else if(Notification.permission==='default') Notification.requestPermission().then(p=>{ if(p==='granted') new Notification(title,{body}); }); } }
 function beep(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0.001,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.2,ctx.currentTime+0.01); o.start(); o.stop(ctx.currentTime+0.25); }catch(_){}}
-function countdownThen(fn){ if(!$('optAuto').checked){ fn(); return; } const overlay=$('overlay'); const count=$('count'); let n=3; count.textContent=n; overlay.style.display='flex'; const t=setInterval(()=>{ n--; count.textContent=n; if(n<=0){ clearInterval(t); overlay.style.display='none'; fn(); } },1000); }
+function countdownThen(fn){ if(!$('optAuto').checked){ fn(); return; } const overlay=$('overlay'); const count=$('count'); let n=3; count.textContent=n; overlay.style.display='flex'; overlay.style.pointerEvents='auto'; const t=setInterval(()=>{ n--; count.textContent=n; if(n<=0){ clearInterval(t); overlay.style.display='none'; overlay.style.pointerEvents='none'; fn(); } },1000); }
 function phaseEnded(){ clearInterval(timer); timer=null; if(mode==='focus'){ addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; notifyUser('Focus complete','Time for a break'); } else { mode='focus'; notifyUser('Break over','Back to focus'); } save(); renderClock(); countdownThen(start); }
 function nextPhase(skipped=false){ if(mode==='focus'){ if(!skipped) addFocusMinutes(+focusMin.value); cycles++; mode = (cycles % (+longEvery.value||4)===0) ? 'long' : 'short'; } else { mode='focus'; } save(); renderClock(); countdownThen(start); }
 $('start').onclick=start; $('pause').onclick=pause; $('reset').onclick=reset; $('skip').onclick=skip; $('complete').onclick=()=>{ addFocusMinutes(+focusMin.value); save(); updateViews(); };
 renderClock();
 
-// ===== Mobile dock =====
+// ====== Mobile dock ======
 function updateDock(){ const dclock=$('dclock'), dphase=$('dphase'), btn=$('dockStart'); dclock.textContent = $('clock').textContent; dphase.textContent = (mode==='focus'?'Focus':mode==='short'?'Break':'Long break'); btn.textContent = (timer? 'Pause' : (mode==='pause'?'Start':'Start')); }
 $('dockStart').addEventListener('click', ()=>{ if(timer) pause(); else start(); });
 
-// ===== Daily Goals =====
+// ====== Daily Goals ======
 function goalsToday(){ const k=todayStr(); if(!goalsByDay[k]) goalsByDay[k]=[]; return goalsByDay[k]; }
 function drawGoals(){ const host=$('goalList'); host.innerHTML=''; goalsToday().forEach(g=>{ const row=document.createElement('div'); row.className='item'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!g.done; const txt=document.createElement('input'); txt.value=g.text; txt.className='grow'; const del=document.createElement('button'); del.textContent='Delete'; cb.onchange=()=>{ g.done=cb.checked; save(); }; txt.onchange=()=>{ g.text=txt.value; save(); }; del.onclick=()=>{ const arr=goalsToday(); const i=arr.findIndex(x=>x.id===g.id); if(i>-1){ arr.splice(i,1); save(); drawGoals(); } }; row.append(cb,txt,del); host.appendChild(row); }); }
 $('addGoal').onclick=()=>{ const v=$('goalInput').value.trim(); if(!v) return; goalsToday().push({id:crypto.randomUUID(), text:v, done:false}); $('goalInput').value=''; save(); drawGoals(); toast('Goal added'); };
 drawGoals();
 
-// ===== Habits =====
+// ====== Habits ======
 function lastNDates(n){ const arr=[]; const now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); arr.push(d.toISOString().slice(0,10)); } return arr; }
 function drawHabits(){ const host=$('habitList'); host.innerHTML=''; const days=lastNDates(7); habits.forEach(h=>{ const row=document.createElement('div'); row.className='item'; const name=document.createElement('input'); name.value=h.name; name.className='grow'; name.onchange=()=>{h.name=name.value; save();}; row.appendChild(name); days.forEach(d=>{ const b=document.createElement('button'); b.textContent=h.days&&h.days[d]?'✔':''; b.title=d; b.onclick=()=>{h.days=h.days||{}; h.days[d]=!h.days[d]; save(); drawHabits(); updateViews();}; row.appendChild(b); }); const del=document.createElement('button'); del.textContent='Delete'; del.onclick=()=>{ const i=habits.findIndex(x=>x.id===h.id); if(i>-1){habits.splice(i,1); save(); drawHabits(); updateViews();} }; row.appendChild(del); host.appendChild(row); }); }
 $('addHabit').onclick=()=>{ const v=$('habitInput').value.trim(); if(!v) return; habits.push({id:crypto.randomUUID(), name:v, days:{}}); $('habitInput').value=''; save(); drawHabits(); toast('Habit added'); };
 drawHabits();
 
-// ===== Progress & Weekly =====
+// ====== Progress & Weekly ======
 function focusedLastNDays(n){ const out=[], now=new Date(); for(let i=n-1;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); const k=d.toISOString().slice(0,10); out.push({k,mins:focusLog[k]||0}); } return out; }
 function weekSum(){ return focusedLastNDays(7).reduce((a,b)=>a+b.mins,0); }
 function buildHeat(){ const el=$('heat'); el.innerHTML=''; const data=focusedLastNDays(35); let cur=0; for(let i=data.length-1;i>=0;i--){ if(data[i].mins>0) cur++; else break; } $('kpiStreak').textContent=cur; $('kpiToday').textContent=focusedToday(); $('kpiWeek').textContent=weekSum(); data.forEach(({mins})=>{ const c=document.createElement('div'); c.className='cell ' + (mins>=60?'c4':mins>=30?'c3':mins>=10?'c2':mins>0?'c1':''); el.appendChild(c); }); }
@@ -252,18 +271,18 @@ function drawChart(){ const cvs=$('chart'); const ctx=cvs.getContext('2d'); cons
 function updateViews(){ buildHeat(); drawWeekTable(); drawChart(); $('minsToday').textContent=focusedToday(); }
 updateViews();
 
-// ===== Export / Import =====
+// ====== Export / Import ======
 $('exportBtn').onclick=()=>{ const blob=new Blob([JSON.stringify({S,habits,focusLog,goalsByDay},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='focusflow-backup.json'; a.click(); toast('Backup saved'); };
 $('importBtn').onclick=()=>{ const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const o=JSON.parse(r.result); Object.assign(S,o.S||{}); habits.splice(0,habits.length,...(o.habits||[])); Object.keys(focusLog).forEach(k=>delete focusLog[k]); Object.assign(focusLog,o.focusLog||{}); Object.assign(goalsByDay,o.goalsByDay||{}); save(); location.reload(); }catch(e){ alert('Import failed: '+e.message); } }; r.readAsText(f); }; inp.click(); };
 
-// ===== Shortcuts =====
+// ====== Shortcuts ======
 document.addEventListener('keydown', (e)=>{ const tag=(e.target.tagName||'').toLowerCase(); if(tag==='input' || tag==='textarea') return; if(e.key.toLowerCase()==='s'){ if(timer) pause(); else start(); } if(e.key.toLowerCase()==='r'){ reset(); } if(e.key.toLowerCase()==='k'){ skip(); } if(e.key.toLowerCase()==='c'){ addFocusMinutes(+focusMin.value); save(); updateViews(); } if(e.key.toLowerCase()==='n'){ $('goalInput').focus(); }});
 
-// ===== PWA install button =====
+// ====== PWA install button ======
 let deferredPrompt=null; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; });
 $('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; } else { alert('On iPhone: Share → Add to Home Screen. On Android: browser menu → Install app.'); } });
 
-// Register service worker (works after you add sw.js to repo root)
+// Register service worker
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
